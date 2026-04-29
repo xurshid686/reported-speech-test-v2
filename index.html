@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reported Speech Quiz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:800px;margin:0 auto;background:white;border-radius:15px;box-shadow:0 20px 40px rgba(0,0,0,0.1);overflow:hidden}
+.header{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:white;padding:30px;text-align:center}
+.header h1{font-size:2.5em;margin-bottom:10px}
+.header p{font-size:1.1em;opacity:0.9}
+.content{padding:40px}
+.screen{display:none}
+.screen.active{display:block}
+input[type="text"]{width:100%;padding:15px;font-size:18px;border:2px solid #e0e0e0;border-radius:10px;margin:20px 0;transition:border-color 0.3s}
+input[type="text"]:focus{outline:none;border-color:#4f46e5}
+.btn{display:inline-block;padding:15px 40px;font-size:18px;border:none;border-radius:10px;cursor:pointer;transition:all 0.3s}
+.btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(79,70,229,0.4)}
+.btn-secondary{background:#e0e0e0;color:#333}
+.btn-secondary:hover{background:#d0d0d0}
+.question{margin-bottom:25px}
+.question-text{font-size:18px;font-weight:600;margin-bottom:15px;color:#333}
+.options{display:grid;gap:10px}
+.option{padding:12px 20px;border:2px solid #e0e0e0;border-radius:10px;cursor:pointer;transition:all 0.2s}
+.option:hover{border-color:#4f46e5;background:#f5f3ff}
+.option.selected{border-color:#4f46e5;background:#ede9fe;font-weight:600}
+.progress-bar{height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;margin-bottom:20px}
+.progress-fill{height:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);transition:width 0.3s}
+.results-header{text-align:center;margin-bottom:30px}
+.results-header h2{font-size:2.2em;color:#4f46e5}
+.score-display{font-size:4em;font-weight:bold;color:#4f46e5;margin:20px 0}
+.review-item{padding:15px;margin-bottom:10px;border-radius:10px;background:#f5f5f5}
+.review-item.correct{background:#dcfce7;border-left:4px solid #22c55e}
+.review-item.wrong{background:#fee2e2;border-left:4px solid #ef4444}
+.leaderboard-section{margin-top:40px;border-top:2px solid #e0e0e0;padding-top:30px}
+.leaderboard-table{width:100%;border-collapse:collapse}
+.leaderboard-table th{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;padding:15px;text-align:left}
+.leaderboard-table td{padding:12px 15px;border-bottom:1px solid #e0e0e0}
+.leaderboard-table tr:nth-child(even){background:#f5f5f5}
+.rank-1 td:first-child{color:#ffd700;font-size:1.3em}
+.rank-2 td:first-child{color:#c0c0c0;font-size:1.2em}
+.rank-3 td:first-child{color:#cd7f32;font-size:1.2em}
+.rating-section{text-align:center;margin:30px 0}
+.rating-section h3{margin-bottom:15px;font-size:1.3em}
+.stars{font-size:2em;cursor:pointer;color:#ccc}
+.stars span{transition:color 0.2s}
+.stars span:hover,.stars span.active{color:#ffd700}
+.rating-val{font-size:1.5em;margin-top:10px;color:#4f46e5;font-weight:600}
+.timer{position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.95);padding:10px 20px;border-radius:10px;font-size:18px;font-weight:600;color:#4f46e5;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+.name-input{text-align:center}
+.name-input h2{color:#4f46e5;font-size:2em;margin-bottom:20px}
+.lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.lb-header h2{font-size:1.5em;color:#4f46e5}
+.refresh-btn{padding:8px 20px;font-size:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:8px;cursor:pointer}
+.refresh-btn:hover{opacity:0.9}
+.question-review{margin-top:30px;border-top:2px solid #e0e0e0;padding-top:20px}
+</style>
+</head>
+<body>
+<div class="timer" id="timer" style="display:none"></div>
+<div class="container">
+<div class="header"><h1>Reported Speech Quiz</h1><p>Choose the correct reported speech version</p></div>
+<div class="content">
+<div class="screen active" id="start-screen"><div class="name-input"><h2>Welcome!</h2><p style="margin-bottom:20px;color:#666">Enter your name to begin</p><input type="text" id="student-name" placeholder="Your full name"><button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button></div></div>
+<div class="screen" id="quiz-screen"><div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div><div id="questions-container"></div><div style="display:flex;justify-content:space-between;margin-top:20px"><button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" style="display:none">Previous</button><button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Next</button></div></div>
+<div class="screen" id="result-screen"><div class="results-header"><h2>Quiz Complete!</h2><p>Your name: <span id="result-name"></span></p></div><div class="score-display"><span id="final-score"></span>/15</div><p style="text-align:center;font-size:1.3em;color:#666">Time: <span id="final-time"></span></p>
+<div class="rating-section"><h3>Rate this quiz</h3><div class="stars" id="stars"><span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span></div><div class="rating-val" id="rating-val"></div></div>
+<button class="btn btn-primary" onclick="submitResults()" style="width:100%;margin-top:20px">Submit Results</button>
+<div class="question-review" id="review-container"></div>
+<div class="leaderboard-section"><div class="lb-header"><h2>Global Leaderboard</h2><button class="refresh-btn" onclick="loadLeaderboard()">Refresh</button></div><table class="leaderboard-table"><thead><tr><th style="width:60px">#</th><th>Name</th><th>Score</th><th>Rating</th></tr></thead><tbody id="leaderboard-body"><tr><td colspan="4" style="text-align:center;color:#999">Loading...</td></tr></tbody></table></div></div>
+</div>
+</div>
+<script>
+const questions=[
+{q:"She said, 'I am tired.'",o:["She said that she is tired.","She said that she was tired.","She said that she has been tired.","She says that she was tired."],a:1},
+{q:"He said, 'I will call you tomorrow.'",o:["He said that he would call me the next day.","He said that he will call me tomorrow.","He says that he would call me tomorrow.","He said that he called me the next day."],a:0},
+{q:"They said, 'We have finished the project.'",o:["They said that they had finished the project.","They said that they have finished the project.","They said that they finished the project.","They say that they had finished the project."],a:0},
+{q:"John said, 'I can swim very well.'",o:["John said that he can swim very well.","John said that he could swim very well.","John says that he could swim very well.","John said that he can swam very well."],a:1},
+{q:"The teacher said, 'You must study harder.'",o:["The teacher said that we must study harder.","The teacher said that we had to study harder.","The teacher said that we must studied harder.","The teacher says that we had to study harder."],a:1},
+{q:"Mary said, 'I have been waiting for an hour.'",o:["Mary said that she has been waiting for an hour.","Mary said that she had been waiting for an hour.","Mary said that she was waiting for an hour.","Mary says that she had been waiting for an hour."],a:1},
+{q:"He said, 'I do not like coffee.'",o:["He said that he does not like coffee.","He said that he did not like coffee.","He says that he did not like coffee.","He said that he does not liked coffee."],a:1},
+{q:"She said, 'I may come late.'",o:["She said that she may come late.","She said that she might come late.","She said that she might came late.","She says that she might come late."],a:1},
+{q:"The doctor said, 'You should rest more.'",o:["The doctor said that I should rest more.","The doctor said that I should rested more.","The doctor says that I should rest more.","The doctor said that I must rest more."],a:0},
+{q:"They said, 'We are going to Paris next week.'",o:["They said that they were going to Paris the next week.","They said that they are going to Paris next week.","They said that they went to Paris next week.","They say that they were going to Paris next week."],a:0},
+{q:"He said, 'I bought a new car yesterday.'",o:["He said that he bought a new car yesterday.","He said that he had bought a new car the previous day.","He said that he has bought a new car the previous day.","He says that he had bought a new car yesterday."],a:1},
+{q:"She said, 'I have never been to Japan.'",o:["She said that she has never been to Japan.","She said that she had never been to Japan.","She said that she never was to Japan.","She says that she had never been to Japan."],a:1},
+{q:"The boy said, 'I was playing football.'",o:["The boy said that he was playing football.","The boy said that he had been playing football.","The boy said that he is playing football.","The boy says that he had been playing football."],a:1},
+{q:"My father said, 'I will help you with your homework.'",o:["My father said that he would help me with my homework.","My father said that he will help me with my homework.","My father said that he would help you with your homework.","My father says that he would help me with my homework."],a:0},
+{q:"She said, 'It has been raining since morning.'",o:["She said that it has been raining since morning.","She said that it had been raining since morning.","She said that it was raining since morning.","She says that it had been raining since morning."],a:1}
+];
+let currentQ=0,answers=[],score=0,userName='',rating=0,startTime,timerInt;
+const API=location.hostname.includes('vercel.app')?'/api':'http://localhost:3000/api';
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function startQuiz(){userName=document.getElementById('student-name').value.trim();if(!userName){alert('Please enter your name');return;}showScreen('quiz-screen');document.getElementById('timer').style.display='block';startTime=Date.now();timerInt=setInterval(()=>{const e=Math.floor((Date.now()-startTime)/1000);const m=Math.floor(e/60),s=e%60;document.getElementById('timer').textContent=`⏱ ${m}:${s.toString().padStart(2,'0')}`},1000);renderQ();loadLB();}
+function renderQ(){const q=questions[currentQ];document.getElementById('progress').style.width=`${((currentQ)/questions.length)*100}%`;const c=document.getElementById('questions-container');c.innerHTML=`<div class="question"><div class="question-text">${currentQ+1}. ${q.q}</div><div class="options">${q.o.map((opt,i)=>`<div class="option ${answers[currentQ]===i?'selected':''}" onclick="sel(${i})">${opt}</div>`).join('')}</div></div>`;document.getElementById('prev-btn').style.display=currentQ===0?'none':'inline-block';document.getElementById('next-btn').textContent=currentQ===questions.length-1?'Submit':'Next';}
+function sel(i){answers[currentQ]=i;document.querySelectorAll('.option').forEach((o,idx)=>{o.classList.toggle('selected',idx===i);});}
+function nextQuestion(){if(answers[currentQ]===undefined&&currentQ<questions.length-1){alert('Please select an answer');return;}if(currentQ<questions.length-1){currentQ++;renderQ();}else{finishQuiz();}}
+function prevQuestion(){if(currentQ>0){currentQ--;renderQ();}}
+function finishQuiz(){clearInterval(timerInt);document.getElementById('timer').style.display='none';score=answers.reduce((sum,a,i)=>a===questions[i].a?sum+1:sum,0);showScreen('result-screen');document.getElementById('result-name').textContent=userName;document.getElementById('final-score').textContent=score;document.getElementById('final-time').textContent=document.getElementById('timer').textContent.replace('⏱ ','');let r='';questions.forEach((q,i)=>{const ua=answers[i]!==undefined?q.o[answers[i]]:'No answer';const ic=answers[i]===q.a;r+=`<div class="review-item ${ic?'correct':'wrong'}"><b>Q${i+1}:</b> ${q.q}<br><span style="color:${ic?'green':'red'}"><b>Your answer:</b> ${ua}</span> | <span style="color:green"><b>Correct:</b> ${q.o[q.a]}</span></div>`;});document.getElementById('review-container').innerHTML=r;loadLB();}
+function setRating(r){rating=r;document.querySelectorAll('#stars span').forEach((s,i)=>s.classList.toggle('active',i<r));document.getElementById('rating-val').textContent='⭐'.repeat(r)+` (${r}/5)`;}
+function loadLB(){fetch(`${API}/leaderboard`).then(r=>r.json()).then(d=>{const tb=document.getElementById('leaderboard-body');if(!d.entries||!d.entries.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#999">No submissions yet. Be the first!</td></tr>';return;}tb.innerHTML=d.entries.map((e,i)=>`<tr class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}"><td>${i+1}</td><td>${e.name}</td><td>${e.score}/${questions.length}</td><td>${'⭐'.repeat(e.rating)}</td></tr>`).join('');}).catch(e=>{document.getElementById('leaderboard-body').innerHTML='<tr><td colspan="4" style="text-align:center;color:#ef4444">Could not load leaderboard</td></tr>';});}
+function submitResults(){const qr=questions.map((q,i)=>({question:q.q,userAnswer:answers[i]!==undefined?q.o[answers[i]]:'No answer',correctAnswer:q.o[q.a],isCorrect:answers[i]===q.a}));const p={name:userName,score:score,percentage:Math.round((score/questions.length)*100),time:document.getElementById('final-time').textContent,rating:rating,questions:qr};fetch(`${API}/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).then(r=>r.json()).then(d=>{alert('Results submitted successfully!');}).catch(e=>{alert('Submitted locally. Server not available.');});}
+</script>
+</body>
+</html>
